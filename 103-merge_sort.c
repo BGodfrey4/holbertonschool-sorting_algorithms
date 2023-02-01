@@ -1,70 +1,146 @@
-#include "sort.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include "sort.h"
 
 /**
- * merge_sort - implementation of merge sort algorithm
- * @array: array of integers
- * @size: size of array
+ * copy - copies data from one buffer to another
+ *
+ * @src: source buffer
+ * @dst: destination buffer
+ * @size: size of buffers
+ *
+ * Return: No Return
  */
-void merge_sort(int *array, size_t size)
+void copy(int *src, int *dst, int size)
 {
-	int *temp = malloc(sizeof(int) * size);
+	int i;
 
-	if (temp == NULL)
-		return;
-	merge_sort_helper(array, temp, size);
-	free(temp);
+	for (i = 0; i < size; i++)
+		dst[i] = src[i];
 }
-
 /**
- * merge_sort_helper - helper function for merge sort
- * @array: array of integers
- * @temp: temporary array
- * @size: size of array
+ * merge - merges two sets of data in ascending order
+ * but they must already be sorted before hand
+ * @array: first set of data
+ * @buff: second set of data
+ * @minL: lower range of first set of data
+ * @maxL: upper range of first set of data
+ * @minR: lower range of second set of data
+ * @maxR: upper range of second set of data
+ *
+ * Return: No Return
  */
-void merge_sort_helper(int *array, int *temp, size_t size)
+void merge(int *array, int *buff, int minL, int maxL, int minR, int maxR)
 {
-	if (size < 2)
-		return;
-	size_t mid = size / 2;
+	int i = minL, j = minR, k = minL;
 
-	merge_sort_helper(array, temp, mid);
-	merge_sort_helper(array + mid, temp + mid, size - mid);
-	merger(array, mid, array + mid, size - mid, temp);
+	while (i <= maxL || j <= maxR)
+
+		if (i <= maxL && j <= maxR)
+			if (buff[i] <= buff[j])
+				array[k] = buff[i], k++, i++;
+			else
+				array[k] = buff[j], k++, j++;
+
+		else if (i > maxL && j <= maxR)
+			array[k] = buff[j], k++, j++;
+		else
+			array[k] = buff[i], k++, i++;
 }
-
 /**
- * merger - merge two sorted arrays
- * @l: left array
- * @size_l: size of left array
- * @r: right array
- * @size_r: size of right array
- * @tmp: temporary array
+ * printcheck - prints an array in a given range
+ *
+ * @array: array of data to be print
+ * @r1: start of range
+ * @r2: end of range
+ *
+ * Return: No Return
  */
-void merger(int *l, size_t size_l, int *r, size_t size_r, int *tmp)
+void printcheck(int *array, int r1, int r2)
 {
-	size_t i = 0, j = 0, k = 0;
+	int i;
 
-	for (i = 0; i < size_l; i++)
-		tmp[i] = l[i];
+	for (i = r1; i <= r2; i++)
+	{
+		if (i > r1)
+			printf(", ");
+		printf("%d", array[i]);
+	}
+	printf("\n");
+}
+/**
+ * split - recursive function to split data into merge tree
+ *
+ * @array: array of data to be split
+ * @buff: auxiliary array of data for merging
+ * @min: min range of data in array
+ * @max: max range of data in array
+ * @size: size of total data
+ *
+ * Return: No Return
+ */
+void split(int *array, int *buff, int min, int max, int size)
+{
+	int mid, tmax, minL, maxL, minR, maxR;
+
+	if ((max - min) <= 0)
+		return;
+
+	mid = (max + min + 1) / 2;
+	tmax = max;
+	max = mid - 1;
+
+	minL = min;
+	maxL = max;
+
+	split(array, buff, min, max, size);
+
+	min = mid;
+	max = tmax;
+
+	minR = min;
+	maxR = max;
+
+	split(array, buff, min, max, size);
 
 	printf("Merging...\n");
 	printf("[left]: ");
-	print_array(l, size_l);
+
+	printcheck(array, minL, maxL);
+
 	printf("[right]: ");
-	print_array(r, size_r);
 
-	for (i = 0; i < size_l && j < size_r; l[k++] = tmp[i], i++)
-		for (; j < size_r && r[j] < tmp[i]; j++)
-			l[k++] = r[j];
-
-	for (; i < size_l; i++)
-		l[k++] = tmp[i];
-
-	for (; j < size_r; j++)
-		l[k++] = r[j];
+	printcheck(array, minR, maxR);
+	merge(array, buff, minL, maxL, minR, maxR);
+	copy(array, buff, size);
 
 	printf("[Done]: ");
-	print_array(l, size_l + size_r);
+	printcheck(array, minL, maxR);
 }
+/**
+ * merge_sort - sorts an array of integers in ascending order
+ * using the Merge sort algorithm
+ *
+ * @array: array of data to be sorted
+ * @size: size of data
+ *
+ * Return: No Return
+ */
+void merge_sort(int *array, size_t size)
+{
+	int *buff;
+
+	if (size < 2)
+		return;
+
+	buff = malloc(sizeof(int) * size);
+	if (buff == NULL)
+		return;
+
+	copy(array, buff, size);
+
+	split(array, buff, 0, size - 1, size);
+
+	free(buff);
+}
+
