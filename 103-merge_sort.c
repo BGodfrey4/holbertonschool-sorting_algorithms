@@ -1,146 +1,93 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "sort.h"
 
 /**
- * copy - copies data from one buffer to another
- *
- * @src: source buffer
- * @dst: destination buffer
- * @size: size of buffers
- *
- * Return: No Return
+ * print_merge - print and merge
+ * @array: random number array
+ * @p1: changer 1
+ * @p2: changer 2
+ * @size: array size
+ * Return: void
  */
-void copy(int *src, int *dst, int size)
+void print_merge(int *array, int *p1, int *p2, size_t size)
 {
-	int i;
+	int a = 0;
+	int b = 0;
+	int c = 0;
+	int size_p1 = size / 2;
+	int size_p2 = size - size_p1;
 
-	for (i = 0; i < size; i++)
-		dst[i] = src[i];
-}
-/**
- * merge - merges two sets of data in ascending order
- * but they must already be sorted before hand
- * @array: first set of data
- * @buff: second set of data
- * @minL: lower range of first set of data
- * @maxL: upper range of first set of data
- * @minR: lower range of second set of data
- * @maxR: upper range of second set of data
- *
- * Return: No Return
- */
-void merge(int *array, int *buff, int minL, int maxL, int minR, int maxR)
-{
-	int i = minL, j = minR, k = minL;
-
-	while (i <= maxL || j <= maxR)
-
-		if (i <= maxL && j <= maxR)
-			if (buff[i] <= buff[j])
-				array[k] = buff[i], k++, i++;
-			else
-				array[k] = buff[j], k++, j++;
-
-		else if (i > maxL && j <= maxR)
-			array[k] = buff[j], k++, j++;
-		else
-			array[k] = buff[i], k++, i++;
-}
-/**
- * printcheck - prints an array in a given range
- *
- * @array: array of data to be print
- * @r1: start of range
- * @r2: end of range
- *
- * Return: No Return
- */
-void printcheck(int *array, int r1, int r2)
-{
-	int i;
-
-	for (i = r1; i <= r2; i++)
+	/** Compares elements of arrays and merges back to original array. Prints */
+	while (a < size_p1 && b < size_p2)
 	{
-		if (i > r1)
-			printf(", ");
-		printf("%d", array[i]);
+
+		if (p1[a] < p2[b])
+		{
+			array[c++] = p1[a++];
+		}
+
+		else
+		{
+			array[c++] = p2[b++];
+		}
+
 	}
-	printf("\n");
-}
-/**
- * split - recursive function to split data into merge tree
- *
- * @array: array of data to be split
- * @buff: auxiliary array of data for merging
- * @min: min range of data in array
- * @max: max range of data in array
- * @size: size of total data
- *
- * Return: No Return
- */
-void split(int *array, int *buff, int min, int max, int size)
-{
-	int mid, tmax, minL, maxL, minR, maxR;
 
-	if ((max - min) <= 0)
-		return;
+	while (a < size_p1)
+	{
+		array[c++] = p1[a++];
+	}
 
-	mid = (max + min + 1) / 2;
-	tmax = max;
-	max = mid - 1;
-
-	minL = min;
-	maxL = max;
-
-	split(array, buff, min, max, size);
-
-	min = mid;
-	max = tmax;
-
-	minR = min;
-	maxR = max;
-
-	split(array, buff, min, max, size);
+	while (b < size_p2)
+	{
+		array[c++] = p2[b++];
+	}
 
 	printf("Merging...\n");
 	printf("[left]: ");
-
-	printcheck(array, minL, maxL);
-
+	print_array(p1, size_p1);
 	printf("[right]: ");
-
-	printcheck(array, minR, maxR);
-	merge(array, buff, minL, maxL, minR, maxR);
-	copy(array, buff, size);
-
+	print_array(p2, size_p2);
 	printf("[Done]: ");
-	printcheck(array, minL, maxR);
+	print_array(array, size);
 }
+
 /**
- * merge_sort - sorts an array of integers in ascending order
- * using the Merge sort algorithm
- *
- * @array: array of data to be sorted
- * @size: size of data
- *
- * Return: No Return
+ * merge_sort - merge sort
+ * @array: random number array
+ * @size: array size
+ * Return: void
  */
 void merge_sort(int *array, size_t size)
 {
-	int *buff;
+	int *izquierda, *derecha;
+	size_t centro;
+	size_t aux;
 
-	if (size < 2)
+	int aux_pos[1024];
+
+	if (array == NULL || size < 2)
+	{
 		return;
+	}
 
-	buff = malloc(sizeof(int) * size);
-	if (buff == NULL)
-		return;
+	centro = size / 2;
+	izquierda = aux_pos;
+	derecha = &aux_pos[centro];
 
-	copy(array, buff, size);
+	for (aux = 0; aux < centro; aux++)
+	{
+		izquierda[aux] = array[aux];
+	}
 
-	split(array, buff, 0, size - 1, size);
+	for (aux = centro; aux < size; aux++)
+	{
+		derecha[aux - centro] = array[aux];
+	}
 
-	free(buff);
+	merge_sort(izquierda, centro);
+
+	merge_sort(derecha, size - centro);
+
+	print_merge(array, izquierda, derecha, size);
 }
 
