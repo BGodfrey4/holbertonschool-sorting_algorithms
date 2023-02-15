@@ -52,7 +52,7 @@ void heap_sort_rec(int *array, size_t size);
 
 int maxIntInArray(int arr[], int n);
 int init_arr_len(int *arr_len);
-void radix_sort(int arr[], int n);
+void radix_sort(int *array, size_t size);
 
 
 int linear_search(int *array, size_t size, int value);
